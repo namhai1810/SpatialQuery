@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+    content="SpatialQuery: Closest-Instance Distance Reasoning in Indoor Scenes via BEV Visual Block Rendering and Uncertainty-Aware Chain-of-Thought Prompting.">
+  <meta name="keywords" content="SpatialQuery, VLM, BEV, Chain-of-Thought">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpatialQuery: Closest-Instance Distance Reasoning in Indoor Scenes</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script> -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <!-- <link rel="icon" href="./static/images/favicon.svg"> -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+
+<body>
+
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="navbar-menu">
+      <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+        <a class="navbar-item" href="#">
+          <span class="icon">
+            <i class="fas fa-home"></i>
+          </span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">SpatialQuery: Benchmarking Geometry-Grounded Multi-Instance Spatial
+            Reasoning in Vision-Language Models</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="#">Hai Nguyen</a><sup>1</sup>,&nbsp;
+            </span>
+            <span class="author-block">
+              <a href="#">Tung Vu</a><sup>1</sup>,&nbsp;
+            </span>
+            <span class="author-block">
+              <a href="#">Cong Tran</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 0.4rem;">
+            <span class="author-block"><sup>1</sup>Posts and Telecommunications Institute of Technology</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Abstract. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              <em><strong>Abstract</strong></em>—Vision-language models (VLMs) achieve strong semantic understanding but
+              remain unreliable in metric spatial
+              reasoning, particularly when queries require comparing multiple instances of the same object category.
+              We study this problem through the <em>Closest-Instance Distance Query</em> (CIDQ), where a model must
+              identify the nearest visible candidate to
+              a unique reference object and estimate their gravity-aligned floor-plane distance. We introduce
+              <small>S<small>PATIAL</small>Q<small>UERY</small></small>, a training-free framework for CIDQ reasoning
+              from a single RGB image,
+              together with <small>S<small>PATIAL</small>Q<small>UERY</small></small>-1M, a benchmark containing
+              over one million RGB-only question–answer pairs from 200 indoor scenes.
+              <small>S<small>PATIAL</small>Q<small>UERY</small></small> recovers instance-level metric
+              geometry and transforms it into a canonical Bird's-Eye View through <em>Scene Cubifying</em>, which
+              represents objects as uniformly
+              sized, category-coded blocks to emphasize their relative floor-plane locations. We further propose
+              <em>Uncertainty-Aware Chain-of-Thought</em> (UA-CoT) prompting, which incorporates geometry-derived
+              per-instance uncertainty into the VLM reasoning process.
+              Without task-specific fine-tuning or architectural modification,
+              <small>S<small>PATIAL</small>Q<small>UERY</small></small> with Qwen3-VL-8B achieves a Floor-MAE of
+              <strong>0.259 m</strong>, an Unc-Acc@0.3 m of <strong>90.5%</strong>, and a proximity-decision
+              accuracy of <strong>84.18%</strong>, outperforming fine-tuned spatial specialists,
+              general-purpose VLMs, and closed-source frontier models. Code,
+              benchmark resources, and an interactive demo are available at <a
+                href="https://namhai1810.github.io/SpatialQuery/"
+                target="_blank">https://namhai1810.github.io/SpatialQuery/</a>.
+            </p>
+            <p>
+              <em><strong>Index Terms</strong></em>—Spatial reasoning, vision-language models, Bird's-Eye View,
+              closest-instance query, chain-of-thought prompting, indoor scene understanding, multi-instance reasoning,
+              uncertainty estimation.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!--/ Abstract. -->
+
+      <div class="columns is-centered has-text-centered">
+        <!-- THAM SỐ 1: Thay 'is-10' thành 'is-12' (to hết cỡ) hoặc 'is-8' (nhỏ hơn) để chỉnh độ rộng khung chứa ảnh -->
+        <div class="column is-15">
+          <h2 class="title is-3">Method Overview</h2>
+          <div class="content has-text-centered">
+            <!-- THAM SỐ 2: Thay 'width: 100%' thành '90%' hoặc '110%' để chỉnh độ to của ảnh so với khung -->
+            <img src="./static/images/overall_framework_7.png" alt="SpatialQuery Main Flow" style="width: 120%;" />
+            <p>
+              Overview of the <strong>SpatialQuery</strong> pipeline.
+            </p>
+          </div>
+
+          <h2 class="title is-3 mt-6">Data Synthesis Pipeline</h2>
+          <div class="content has-text-centered">
+            <!-- THAM SỐ 2 (như trên) -->
+            <img src="./static/images/qa_synthesis_7_demo.png" alt="SpatialQuery Data Generation Flow"
+              style="width: 120%;" />
+            <p>
+              The <strong>SpatialQuery-1M</strong> automated data synthesis pipeline.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!--/ Method. -->
+    </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Results & Demos</h2>
+
+      <div class="demo-container">
+        <!-- Demo 1 -->
+        <div class="box">
+          <h3 class="title is-4">Demo 42444499</h3>
+          <div class="columns is-multiline">
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444499/original.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444499/original.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>Original Video</strong></p>
+            </div>
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444499/abstract_scene.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444499/abstract_scene.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>Abstract Scene</strong></p>
+            </div>
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444499/qa_detect.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444499/qa_detect.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>QA Detect</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo 2 -->
+        <div class="box">
+          <h3 class="title is-4">Demo 42444708</h3>
+          <div class="columns is-multiline">
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444708/original.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444708/original.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>Original Video</strong></p>
+            </div>
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444708/abstract_scene.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444708/abstract_scene.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>Abstract Scene</strong></p>
+            </div>
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444708/qa_detect.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444708/qa_detect.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>QA Detect</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo 3 -->
+        <div class="box">
+          <h3 class="title is-4">Demo 42444738</h3>
+          <div class="columns is-multiline">
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444738/original.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444738/original.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>Original Video</strong></p>
+            </div>
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444738/abstract_scene.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444738/abstract_scene.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>Abstract Scene</strong></p>
+            </div>
+            <div class="column is-4">
+              <video controls autoplay muted loop playsinline poster="./vid/video_demo_42444738/qa_detect.jpg"
+                style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <source src="./vid/video_demo_42444738/qa_detect.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered is-size-6 mt-2"><strong>QA Detect</strong></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Dataset Visualization</h2>
+
+      <!-- Bedroom -->
+      <div class="box">
+        <h3 class="title is-4">Bedroom</h3>
+        <div class="columns is-multiline">
+          <div class="column is-4"><img src="./demo_images/bedroom_1.png" alt="Bedroom 1"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/bedroom_2.png" alt="Bedroom 2"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/bedroom_3.png" alt="Bedroom 3"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/bedroom_4.png" alt="Bedroom 4"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/bedroom_5.png" alt="Bedroom 5"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/bedroom_6.png" alt="Bedroom 6"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+        </div>
+      </div>
+
+      <!-- Kitchen -->
+      <div class="box">
+        <h3 class="title is-4">Kitchen</h3>
+        <div class="columns is-multiline">
+          <div class="column is-4"><img src="./demo_images/kitchen_1.png" alt="Kitchen 1"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/kitchen_2.png" alt="Kitchen 2"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/ktichen_3.png" alt="Kitchen 3"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/kitchen_4.png" alt="Kitchen 4"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/kitchen_5.png" alt="Kitchen 5"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/kitchen_6.png" alt="Kitchen 6"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+        </div>
+      </div>
+
+      <!-- Living Room -->
+      <div class="box">
+        <h3 class="title is-4">Living Room</h3>
+        <div class="columns is-multiline">
+          <div class="column is-4"><img src="./demo_images/livingroom_1.png" alt="Living Room 1"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/livingroom_2.png" alt="Living Room 2"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/living_room_3.png" alt="Living Room 3"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/living_room_4.png" alt="Living Room 4"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/livingroom_5.png" alt="Living Room 5"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/livingroom_6.png" alt="Living Room 6"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; aspect-ratio: 4/3; object-fit: contain; background-color: #f5f5f5;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Toilet -->
+      <div class="box">
+        <h3 class="title is-4">Toilet</h3>
+        <div class="columns is-multiline">
+          <div class="column is-4"><img src="./demo_images/toilet_1.png" alt="Toilet 1"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/toilet_2.png" alt="Toilet 2"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/toilet_3.png" alt="Toilet 3"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/toilet_4.png" alt="Toilet 4"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/toilet_5.png" alt="Toilet 5"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+          <div class="column is-4"><img src="./demo_images/toilet_6.png" alt="Toilet 6"
+              style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section class="section" id="results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Quantitative Results</h2>
+
+      <!-- Table III -->
+      <div class="box" style="margin-bottom: 2rem;">
+        <h3 class="title is-4 has-text-centered" style="margin-bottom: 0.5rem;">Table III: T1: Closest-Instance Distance
+          Estimation</h3>
+
+        <figure class="image">
+          <img src="./images/table_3.png" alt="Table III: T1 Closest-Instance Distance Estimation Results"
+            style="width: 100%; max-width: 960px; margin: 0 auto; display: block; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.12);">
+        </figure>
+      </div>
+
+      <!-- Table IV -->
+      <div class="box" style="margin-bottom: 2rem;">
+        <h3 class="title is-4 has-text-centered" style="margin-bottom: 0.5rem;">Table IV: T2: Proximity Decision
+          Classification</h3>
+        <figure class="image">
+          <img src="./images/table_4.png" alt="Table IV: T2 Proximity Decision Classification Results"
+            style="width: 100%; max-width: 720px; margin: 0 auto; display: block; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.12);">
+        </figure>
+      </div>
+
+      <!-- Table V -->
+      <div class="box" style="margin-bottom: 2rem;">
+        <h3 class="title is-4 has-text-centered" style="margin-bottom: 0.5rem;">Table V: Component ablation</h3>
+        <figure class="image">
+          <img src="./images/table_5.png" alt="Table V: Component Ablation Study Results"
+            style="width: 100%; max-width: 960px; margin: 0 auto; display: block; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.12);">
+        </figure>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section class="section" id="BibTeX" style="display: none;">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>@article{spatialquery2026,
+  title={SpatialQuery: Closest-Instance Distance Reasoning in Indoor Scenes via BEV Visual Block Rendering and Uncertainty-Aware Chain-of-Thought Prompting},
+  author={Anonymous Authors},
+  journal={Under Review},
+  year={2026}
+}</code></pre>
+    </div>
+  </section>
+
+
+  <footer class="footer">
+    <div class="container">
+      <div class="content has-text-centered">
+        <a class="icon-link" href="#">
+          <i class="fas fa-file-pdf"></i>
+        </a>
+        <a class="icon-link" href="#" class="external-link" disabled>
+          <i class="fab fa-github"></i>
+        </a>
+      </div>
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This website is developed based on <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.demo-video').forEach(video => {
+      video.playbackRate = 0.5;
+      video.addEventListener('loadedmetadata', function () {
+        this.playbackRate = 0.5;
+      });
+      video.addEventListener('click', function (e) {
+        // Prevent clicking controls from triggering full screen if possible
+        // but usually we want the whole video to be clickable
+        if (e.offsetY < this.offsetHeight - 50) { // Simple check to avoid control bar
+          if (this.requestFullscreen) {
+            this.requestFullscreen();
+          } else if (this.webkitRequestFullscreen) {
+            this.webkitRequestFullscreen();
+          }
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
